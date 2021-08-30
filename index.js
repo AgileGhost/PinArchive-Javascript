@@ -14,25 +14,15 @@ client.GuildData = new Collection();
 client.MemberData = new Collection();
 
 //Grabs a folder and then grabs all the sub folders within that folder
-function GetDirectories(location) {
-    switch(location) {
-        case "Interaction":
-            return readdirSync("./Commands/Interaction").filter(function subFolder(folder) {
-                return statSync("./Commands/Interaction/" + folder).isDirectory();
-            });
-            break;
-        /*
-        case "Audit":
-            return readdirSync("").filter(function subFolder(folder) {
-                return statSync("" + folder).isDirectory();
-            });
-            break;
-            */
-        case "Message":
-            return readdirSync("").filter(function subFolder(folder) {
-                return statSync("" + folder).isDirectory();
-            });
-            break;
+function GetDirectories(type) {
+    if (type = "Interaction") {
+        return readdirSync("./Commands/Interaction").filter(function subFolder(file) {
+            return statSync("./Commands/Interaction/" + file).isDirectory();
+        });
+    } else if(type = "Message") {
+        return readdirSync("./Commands/Message").filter(function subFolder(file) {
+            return statSync("./Commands/Message/" + file).isDirectory();
+        });
     }
 }
 //Assuming there will be no commands outside of the subfolders
