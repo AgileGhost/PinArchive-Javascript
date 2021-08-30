@@ -1,39 +1,49 @@
 //calling in packages
 const { Client, Intents, Collection } = require("discord.js");
 const { readdirSync, statSync } = require("fs");
-const { TOKEN } = require("./config.json");
+const { TOKEN, MONGOOSE_LOGIN } = require("./config.json");
+const mongoose = require("mongoose");
+
+//calling in database models
+const GuildData = require("./Models/GuildData.js");
 
 
 //init the main client.
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 
-//Collections, Main Cache Data. Decided to make my own instead of relying on the built in ones as they sometimes miss information. 
+//connecting to the mongoDB database
+mongoose.connect(MONGOOSE_LOGIN, { useNewUrlParser: true, useUnifiedTopology: true });
+//states the connection when there is an update and when it connects
+mongoose.connection.on("connected", async () => {
+    console.log("successfully connected to the database");
+});
+
+mongoose.connection.on("disconnected", async () => {
+    console.log("The connection to the database has ended!");
+});
+
+mongoose.connection.on("error", async (err) => {
+    console.log(`There was an error with the connection to the database: ${console.log(err)}`);
+});
+
+//Collections, Main Cache Data 
 client.InteractionCommands = new Collection();
 client.MessageCommands = new Collection();
-client.GuildData = new Collection();
-client.MemberData = new Collection();
 
 //Grabs a folder and then grabs all the sub folders within that folder
-function GetDirectories(type) {
-    if (type = "Interaction") {
-        return readdirSync("./Commands/Interaction").filter(function subFolder(file) {
-            return statSync("./Commands/Interaction/" + file).isDirectory();
-        });
-    } else if(type = "Message") {
-        return readdirSync("./Commands/Message").filter(function subFolder(file) {
-            return statSync("./Commands/Message/" + file).isDirectory();
-        });
-    }
+function GetDirectories(location) {
+    return readdirSync(location).filter(function subFolder(folder) {
+        return statSync(location + "/" + folder).isDirectory();
+    });
 }
 //Assuming there will be no commands outside of the subfolders
 //Importing Interaction Commands
 //FOLDER:      ./Commands/Interaction
 let InteractionFiles = [];
-for (const folder of GetDirectories("Interaction")) {
-    console.log("one");
+for (const folder of GetDirectories("./Commands/Interaction")) {
     const folderFiles = readdirSync("./Commands/Interaction/" + folder).filter(file => file.endsWith(".js"));
     for (const file of folderFiles) {
-        InteractionFiles([folder, file]);
+        InteractionFiles.push([folder, file]);
     }
 }
 //Loads and stashes the interactions
@@ -55,9 +65,9 @@ for (const file of InteractionFiles) {
 //FOLDER:       ./Commands/Message
 let MsgCmdFiles = [];
 for (const folder of GetDirectories("./Commands/Message")) {
-    const folderFiles = readdirSync("./Command/Message/" + folder).filter(file => file.endsWith(".js"));
+    const folderFiles = readdirSync("./Commands/Message/" + folder).filter(file => file.endsWith(".js"));
     for (const file of folderFiles) {
-        MsgCmdFiles([folder, file]);
+        MsgCmdFiles.push([folder, file]);
     }
 }
 
@@ -88,10 +98,13 @@ client.on("ready", () => {
         }
         InterData.push(newInt);
     });
-    console.log(InterData);          //just to see if the array is actually being created!
+    //console.log(InterData);          //just to see if the array is actually being created!
     client.guilds.cache.forEach(async guild => {
+        await guild.commands.set(InterData).catch(err => {
+            //ERROR HANDLER HERE
+            console.log(err);
+        });
         console.log(guild.id + " has been updated!!");
-        //await guild.commands.set(InterData);
     });
 });
 
@@ -99,7 +112,7 @@ client.on("ready", () => {
 //INTERACTION CREATED.          When an interaction is sent to the bot.
 client.on("interactionCreate", interaction => {
     console.log(interaction);               //gives raw data of the interaction. Recommended to be commented out
-    if (interaction.isCommand()) return;           //if the interaction isn't a command
+    if (!interaction.isCommand()) return;           //if the interaction isn't a command
     //finds a match out of the commands
     client.InteractionCommands.forEach(cmd => {
         if (cmd.name === interaction.commandName) {
@@ -110,7 +123,42 @@ client.on("interactionCreate", interaction => {
 
 //MESSAGE CREATED           When a message is send on the guild/DM's
 client.on("messageCreate", async msg => {
+    if (message.system) return;
+    if (message.bot) return;
+    if (!message.guild.id) return;
     console.log(msg);
+    GuildData.findOne({ id: message.guild.id }, (err, GuildD) => {
+        if (!GuildD) {
+            const NewGuildData = new GuildData({
+                id: message.guild.id,
+                creationDate: Date.now()
+            });
+            return NewGuildData.save().catch(err => console.log(err));
+        } else {
+            const MentionRegex = new RegExp(`^(<@!?${client.user.id}>|${escapeRegex(GuildD.prefix)})\\s*`);
+            let msgLC = message.content.toLowerCase();
+            //checks if the message has the bot's mention or the normal message prefix and trims it out
+            if (MentionRegex.test(msgLC)) {
+                const [, matchedPrefix] = msgLC.match(MentionRegex);
+                if (msgLC.startsWith(matchedPrefix)) {
+                    //splits the message into arguments for each word and trims out the command name in its own var
+                    const args = message.content.slice(matchedPrefix.length).trim().split(/ +/);
+                    const commandName = args.shift().toLowerCase();
+                    //now grabbing the command and checking for an alias
+                    const command = client.MessageCommands.get(commandName) || client.MessageCommands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+                    if (!command) return;
+
+                    //Checks both the bots and users perms
+                    if (message.member.hasPermission(command.userPermissions) && message.guild.me.hasPermission(command.botPermissions)) {
+                        //executes the command yay
+                        command.execute(message, args);
+                    } else {
+                        message.channel.send("Missing Permission!");
+                    }
+                }
+            }
+        }
+    });
 });
 
 
