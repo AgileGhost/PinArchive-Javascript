@@ -15,15 +15,32 @@ client.MemberData = new Collection();
 
 //Grabs a folder and then grabs all the sub folders within that folder
 function GetDirectories(location) {
-    return readdirSync(location).filter(function subFolder(folder) {
-        return statSync(location + "/" + folder).isDirectory();
-    });
+    switch(location) {
+        case "Interaction":
+            return readdirSync("./Commands/Interaction").filter(function subFolder(folder) {
+                return statSync("./Commands/Interaction/" + folder).isDirectory();
+            });
+            break;
+        /*
+        case "Audit":
+            return readdirSync("").filter(function subFolder(folder) {
+                return statSync("" + folder).isDirectory();
+            });
+            break;
+            */
+        case "Message":
+            return readdirSync("").filter(function subFolder(folder) {
+                return statSync("" + folder).isDirectory();
+            });
+            break;
+    }
 }
 //Assuming there will be no commands outside of the subfolders
 //Importing Interaction Commands
 //FOLDER:      ./Commands/Interaction
 let InteractionFiles = [];
-for (const folder of GetDirectories("./Commands/Interaction")) {
+for (const folder of GetDirectories("Interaction")) {
+    console.log("one");
     const folderFiles = readdirSync("./Commands/Interaction/" + folder).filter(file => file.endsWith(".js"));
     for (const file of folderFiles) {
         InteractionFiles([folder, file]);
@@ -84,7 +101,7 @@ client.on("ready", () => {
     console.log(InterData);          //just to see if the array is actually being created!
     client.guilds.cache.forEach(async guild => {
         console.log(guild.id + " has been updated!!");
-        await guild.commands.set(InterData);
+        //await guild.commands.set(InterData);
     });
 });
 
