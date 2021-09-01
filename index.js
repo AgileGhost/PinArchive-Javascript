@@ -1,5 +1,5 @@
 //calling in packages
-const { Client, Intents, Collection } = require("discord.js");
+const { Client, Intents, Collection, MessageEmbed, Permissions } = require("discord.js");
 const { readdirSync, statSync } = require("fs");
 const { TOKEN, MONGOOSE_LOGIN } = require("./config.json");
 const mongoose = require("mongoose");
@@ -9,7 +9,7 @@ const GuildData = require("./Models/GuildData.js");
 
 
 //init the main client.
-const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
+const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES ] });
 
 //connecting to the mongoDB database
 mongoose.connect(MONGOOSE_LOGIN, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -122,19 +122,63 @@ client.on("interactionCreate", interaction => {
 });
 
 //MESSAGE CREATED           When a message is send on the guild/DM's
-client.on("messageCreate", async msg => {
+client.on("messageCreate", async message => {
     if (message.system) return;
     if (message.bot) return;
     if (!message.guild.id) return;
-    console.log(msg);
-    GuildData.findOne({ id: message.guild.id }, (err, GuildD) => {
+    //console.log(message);
+    GuildData.findOne({ id: message.guild.id }, async (err, GuildD) => {
+        //if no Guild data found it will just ignore all messages
         if (!GuildD) {
-            const NewGuildData = new GuildData({
-                id: message.guild.id,
-                creationDate: Date.now()
-            });
-            return NewGuildData.save().catch(err => console.log(err));
+            //The creation of a new Schema to be saved
+            try {
+                let channel = await message.guild.channels.cache.find(c => c.name === "pin-archive");
+                if (!channel) {
+                    //creates a channel if it was unable to find one.
+                    if (message.guild.me.permissions.has([Permissions.FLAGS.MANAGE_CHANNELS])) {
+                        channel = message.guild.channels.create("pin-archive", {
+                            topic: "An archive of all pinned messages",
+                            permissionOverwrites: [
+                                {
+                                    id: message.guild.roles.everyone,
+                                    allow: [Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.READ_MESSAGE_HISTORY],
+                                    deny: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.VIEW_CHANNEL]
+                                },
+                                {
+                                    id: message.guild.me,
+                                    allow: [Permissions.FLAGS.SEND_MESSAGES]
+                                }
+                            ],
+                            reason: "Created as I was unable to find any pin-archive channel!",
+                        });
+                        let newPinEmbed = new MessageEmbed()
+                            .setColor("#0477BE")
+                            .setDescription("Created this channel as I was unable to find any 'pin-archive'");
+                        channel.send(newPinEmbed);
+                    } else {
+                        channel = "pin-archive";
+                        try {
+                            message.guild.systemChannel.send();
+                        } catch (err) {
+                            //dont have perms to send within the channel! I could look through all channels and find the first that the bot can talk
+                            //in but that isn't needed atm
+                            console.log(err);
+                        }
+                    }
+                }
+                const NewGuildData = new GuildData({
+                    id: message.guild.id,
+                    creationDate: Date.now(),
+                    pinArchive: {
+                        channel: channel.id
+                    }
+                });
+                return NewGuildData.save();
+            } catch (err) {
+                console.log(err);
+            }
         } else {
+            const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
             const MentionRegex = new RegExp(`^(<@!?${client.user.id}>|${escapeRegex(GuildD.prefix)})\\s*`);
             let msgLC = message.content.toLowerCase();
             //checks if the message has the bot's mention or the normal message prefix and trims it out
@@ -149,7 +193,7 @@ client.on("messageCreate", async msg => {
                     if (!command) return;
 
                     //Checks both the bots and users perms
-                    if (message.member.hasPermission(command.userPermissions) && message.guild.me.hasPermission(command.botPermissions)) {
+                    if (message.member.permissions.has(command.userPermissions) && message.guild.me.permissions.has(command.botPermissions)) {
                         //executes the command yay
                         command.execute(message, args);
                     } else {
@@ -159,6 +203,26 @@ client.on("messageCreate", async msg => {
             }
         }
     });
+});
+
+
+//defining to the pinarchive code
+const PinArchive = require("./Audit/channelPinsUpdate.js");
+client.on("channelPinsUpdate", async channel => {
+    if (!channel.guild) return;     //returns if there isn't a guild attached
+    //If there is infomation missing due to missing the event, it will try to grab the infomation
+    if (!channel.partial) {
+        try {
+            //grabs info
+            await channel.fetch();
+        } catch (err) {
+            //oh no. How did we get here XD
+            return console.log(err);
+        }
+    }
+
+    //Sends the event to another place
+    PinArchive.execute(channel);
 });
 
 
