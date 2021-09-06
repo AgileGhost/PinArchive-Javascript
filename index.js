@@ -209,7 +209,6 @@ client.on("messageCreate", async message => {
 //defining to the pinarchive code
 const PinArchive = require("./Audit/channelPinsUpdate.js");
 client.on("channelPinsUpdate", async channel => {
-    if (!channel.guild) return;     //returns if there isn't a guild attached
     //If there is infomation missing due to missing the event, it will try to grab the infomation
     if (!channel.partial) {
         try {
@@ -220,7 +219,7 @@ client.on("channelPinsUpdate", async channel => {
             return console.log(err);
         }
     }
-
+    if (!channel.guild) return;     //returns if there isn't a guild attached
     //Sends the event to another place
     PinArchive.execute(channel);
 });
