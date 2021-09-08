@@ -6,7 +6,9 @@ const GuildSchema = Schema({
     prefix: { type: String, lowercase: true, trim: true, minLength: 1, maxLength: 6, default: "m!" },   //Sets the prefix and make sure it isn't something stupid
     pinArchive: {
         enabled: { type: Boolean, default: true },
-        channel: { type: String, required: true }
+        channel: { type: String, required: true, default: "pin-archive" },
+        autoRemove: { type: Boolean, default: true },
+        archiveAll: { type: Boolean, default: true }
     }
 
 });
