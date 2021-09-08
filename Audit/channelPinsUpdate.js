@@ -28,27 +28,27 @@ var methods = {
                         pins.forEach(pin => {
                             Tpins++;
                             let i = 0;
-                            console.log("LOOOP!");
+                            //console.log("LOOOP!");
                             //loops through all the pins archived
                             //Makes sure there is an array to loop though
                             console.log(chdata.pinArchive.pinnedMessages.length);
                             if (chdata.pinArchive.pinnedMessages.length > 0) {
                                 chdata.pinArchive.pinnedMessages.forEach(archivedID => {
                                     //if finds a match will count up by one
-                                    console.log("LOOOP 2!");
+                                    //console.log("LOOOP 2!");
                                     if (pin.id === archivedID) {
                                         i++;
                                         console.log("FOUND ONE!");
                                     }
                                     //if no match is found then it will try to send the message
-                                    if (i !== 0) {
-                                        Fpin = true;
-                                        console.log("Found a new pin!");
-                                        //SENDS MESSAGE
-
-                                        SendPin(pin, channel, chdata, guildD);
-                                    }
                                 });
+                                if (i !== 0) {
+                                    Fpin = true;
+                                    console.log("Found a new pin!");
+                                    //SENDS MESSAGE
+
+                                    SendPin(pin, channel, chdata, guildD);
+                                }
                             } else {
                                 //If there is no array to loop through it will just archive them all unless the setting is disabled.
                                 if (guildD.pinArchive.archiveAll) {
@@ -70,7 +70,7 @@ var methods = {
                         //for just in case the event executes when there isnt a pin added like if someone removed a pin
                         if (Fpin && guildD.pinArchive.autoRemove) {
                             //removes a pin if there is 50 pins or more
-                            console.log("PIN REMOVAL TOOL");
+                            //console.log("PIN REMOVAL TOOL");
                             if (Tpins > 49) {
                                 try {
                                 //unpins
