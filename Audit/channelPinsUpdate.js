@@ -1,5 +1,6 @@
 const ChannelData = require("../Models/ChannelData.js");
 const GuildData = require("../Models/GuildData.js");
+let BlkMsgDelay = -3500;
 
 var methods = {
     name: "PinArchive",             //for when a command handler is added for the AUDIT stuff
@@ -42,11 +43,12 @@ var methods = {
                                     }
                                     //if no match is found then it will try to send the message
                                 });
-                                if (i !== 0) {
+                                if (i === 0) {
                                     Fpin = true;
                                     console.log("Found a new pin!");
                                     //SENDS MESSAGE
-
+                                    console.log("Send Pin area 1");
+                                    chdata.pinArchive.pinnedMessages.push(pin.id);
                                     SendPin(pin, channel, chdata, guildD);
                                 }
                             } else {
@@ -54,6 +56,8 @@ var methods = {
                                 if (guildD.pinArchive.archiveAll) {
                                     //if enabled sends the message
                                     //SEND MESSGE
+                                    console.log("Send Pin area 2");
+                                    chdata.pinArchive.pinnedMessages.push(pin.id);
                                     SendPin(pin, channel, chdata, guildD);
 
                                 } else {
@@ -61,6 +65,8 @@ var methods = {
                                     if (!Fpin) {
                                         Fpin = true;
                                         //SEND MESSAGE
+                                        console.log("Send Pin area 3");
+                                        chdata.pinArchive.pinnedMessages.push(pin.id);
                                         SendPin(pin, channel, chdata, guildD);
 
                                     }
@@ -74,9 +80,8 @@ var methods = {
                             if (Tpins > 49) {
                                 try {
                                 //unpins
-
-                                    console.log("Found a pin and was going to remove it");
-
+                                    console.log("Found a pin and was removed");
+                                    pins.last().unpin({ reason: 'Removed the oldest pin due to the cap being hit!' });
                                 } catch (err) {
                                     console.log(err);
                                 }
@@ -85,6 +90,7 @@ var methods = {
                     } catch (err) {
                         console.log(err);
                     }
+                    chdata.save().catch(err => console.log(err));
                 }
             });
         });
@@ -92,10 +98,16 @@ var methods = {
 }
 
 function SendPin(pin, channel, chdata, guildD) {
-    chdata.pinArchive.pinnedMessages.push(pin.id);
     console.log("Pushed " + pin.id + " to the archived list!");
-    chdata.save().catch(err => console.log(err));
     console.log("sending....");
+    //sorts out if the channel is private or is classified as private. If Private will ask if it should be archived
+    BlkMsgDelay = BlkMsgDelay + 3500;       //counts up each message
+    setTimeout(() => {
+        if (chdata.pinArchive.private || channel.permissionsFor(channel.guild.roles.everyone).has())
+
+
+
+    }, BlkMsgDelay);
 }
 
 

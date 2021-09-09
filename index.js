@@ -221,7 +221,10 @@ client.on("channelPinsUpdate", async channel => {
     }
     if (!channel.guild) return;     //returns if there isn't a guild attached
     //Sends the event to another place
-    PinArchive.execute(channel);
+    //The small delay fixes an issue were a quick event will run before its saved from the first one
+    setTimeout(() => {
+        PinArchive.execute(channel);
+    }, 3000);
 });
 
 
