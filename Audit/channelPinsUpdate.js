@@ -6,7 +6,6 @@ var methods = {
     async execute(channel) {
         GuildData.findOne({ id: channel.guild.id }, (err, guildD) => {
             ChannelData.findOne({ id: channel.id }, async (err, chdata) => {
-                //console.log("EXECUTED");
                 if (!guildD) return;         //oh no something went wrong and no data was found
                 if (!chdata) {
                     const NewChannelData = new ChannelData({
@@ -21,7 +20,6 @@ var methods = {
                 let Tpins = 0;
                 let Fpin = false        //all pins, pins count, If the pin was found and archived;
                 if (chdata.pinArchive.enabled && guildD.pinArchive.enabled) {
-                    //console.log("OKAY!");
                     let SendPins = [];
                     try {
                         pins = await channel.messages.fetchPinned();
@@ -29,25 +27,19 @@ var methods = {
                         pins.forEach(pin => {
                             Tpins++;
                             let i = 0;
-                            //console.log("LOOOP!");
                             //loops through all the pins archived
                             //Makes sure there is an array to loop though
-                            //console.log(chdata.pinArchive.pinnedMessages.length);
                             if (chdata.pinArchive.pinnedMessages.length > 0) {
                                 chdata.pinArchive.pinnedMessages.forEach(archivedID => {
                                     //if finds a match will count up by one
-                                    //console.log("LOOOP 2!");
                                     if (pin.id === archivedID) {
                                         i++;
-                                        //console.log("FOUND ONE!");
                                     }
                                     //if no match is found then it will try to send the message
                                 });
                                 if (i === 0) {
                                     Fpin = true;
-                                    //console.log("Found a new pin!");
-                                    //SENDS MESSAGE
-                                    //console.log("Send Pin area 1");
+                                    //Adds message to the sending list and adds the new ID to the archive list.
                                     chdata.pinArchive.pinnedMessages.push(pin.id);
                                     SendPins.push(pin);
                                 }
@@ -55,16 +47,14 @@ var methods = {
                                 //If there is no array to loop through it will just archive them all unless the setting is disabled.
                                 if (guildD.pinArchive.archiveAll) {
                                     //if enabled sends the message
-                                    //SEND MESSGE
-                                    //console.log("Send Pin area 2");
+                                    //Adds message to the sending list and adds the new ID to the archive list.
                                     chdata.pinArchive.pinnedMessages.push(pin.id);
                                     SendPins.push(pin);
                                 } else {
                                     //if disabled checks if one has already been sent since pins are all in order
                                     if (!Fpin) {
                                         Fpin = true;
-                                        //SEND MESSAGE
-                                        //console.log("Send Pin area 3");
+                                        //Adds message to the sending list and adds the new ID to the archive list.
                                         chdata.pinArchive.pinnedMessages.push(pin.id);
                                         SendPins.push(pin);
                                     }
@@ -89,13 +79,16 @@ var methods = {
                         console.log(err);
                     }
                     chdata.save().catch(err => console.log(err));
-
                     if (SendPins.length > 0) {
                         console.log(SendPins);
-                    } else {
-                        console.log("executed again but with no stuff")
+
+
+
+
+
+
                     }
-                    
+
 
 
 
@@ -104,27 +97,6 @@ var methods = {
         });
     }
 }
-
-
-/*
-function SendPin(pin, channel, chdata, guildD) {
-    console.log("Pushed " + pin.id + " to the archived list!");
-    console.log("sending....");
-    //sorts out if the channel is private or is classified as private. If Private will ask if it should be archived
-    //BlkMsgDelay = BlkMsgDelay + 3500;       //counts up each message
-    
-    setTimeout(() => {
-        if (chdata.pinArchive.private || channel.permissionsFor(channel.guild.roles.everyone).has())
-
-
-
-    },BlkMsgDelay);
-}
-*/
-
-
-
-
 
 
 
