@@ -223,6 +223,7 @@ client.on("channelPinsUpdate", async channel => {
     //Sends the event to another place
     //The small delay fixes an issue were a quick event will run before its saved from the first one
     setTimeout(() => {
+        console.log("Running....");
         PinArchive.execute(channel);
     }, 5000);       //delay of 5 seconds to stop api lag and a double event
 });

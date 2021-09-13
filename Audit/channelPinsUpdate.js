@@ -1,10 +1,11 @@
+const { Permissions, MessageEmbed, MessageButton, MessageActionRow } = require("discord.js");
 const ChannelData = require("../Models/ChannelData.js");
 const GuildData = require("../Models/GuildData.js");
 
 var methods = {
     name: "PinArchive",             //for when a command handler is added for the AUDIT stuff
     async execute(channel) {
-        GuildData.findOne({ id: channel.guild.id }, (err, guildD) => {
+        GuildData.findOne({ id: channel.guild.id }, async (err, guildD) => {
             ChannelData.findOne({ id: channel.id }, async (err, chdata) => {
                 if (!guildD) return;         //oh no something went wrong and no data was found
                 if (!chdata) {
@@ -18,12 +19,83 @@ var methods = {
                 }
                 let pins;
                 let Tpins = 0;
-                let Fpin = false        //all pins, pins count, If the pin was found and archived;
                 if (chdata.pinArchive.enabled && guildD.pinArchive.enabled) {
                     let SendPins = [];
-                    try {
                         pins = await channel.messages.fetchPinned();
                         //shifts through all the pins in a loop
+                        pins.forEach(pin => {
+                            Tpins++;
+                            let i = 0;
+                            chdata.pinArchive.pinnedMessages.forEach(ArchID => {
+                                //if there is a match then it will skip over the message
+                                if (ArchID === pin.id) {
+                                    i++;
+                                }
+                            });
+                            if (i === 0) {
+                                SendPins.push(pin);
+                                chdata.pinArchive.pinnedMessages.push(pin.id);
+                            }
+                        });
+                        //updates the database with the new list
+                        chdata.save().catch(err => console.log(err));
+                        //Makes sure there is a pin to be sent.
+                        if (SendPins.length > 0) {
+                            if (SendPins > 1) {     //Checks if archive all is on, if so it will just ignore, if not will trim to the first found.
+                                if (!guild.pinArchive.archiveAll) {
+                                    //NOTE: last pin in SendPins will be the first (found) on the list
+                                    SendPins = SendPins.last();
+                                    console.log(SendPins);
+                                }
+                            }
+                            //Checks if the channel is private, (both the channel itself and setting) if so will send a confirmation
+                            if (chdata.pinArchive.private || !channel.permissionsFor(channel.guild.roles.everyone).has(Permissions.FLAGS.VIEW_CHANNEL)) {
+                                console.log("True");
+                                //the creation of an embed.
+                                let confirmEmbed = new MessageEmbed()
+                                    .setAuthor("pin-archive")
+                                    .setDescription("This channel has been classified as a private channel, would you like to archive this pin? Otherwise it will be removed once 50 more pins have been added")
+                                    .setTimestamp()
+                                    .setFooter("ID: " + channel.id);
+                                //The row underneath the message mainly for buttons like this
+                                let row = new MessageActionRow()
+                                    .addComponents(
+                                        //Button one, to confirm
+                                        new MessageButton()
+                                            .setCustomId("Confirm")
+                                            .setLabel("Confirm")
+                                            .setStyle("SUCCESS"),
+                                        //Button two, to deny
+                                        new MessageButton()
+                                            .setCustomId("Deny")
+                                            .setLabel("Deny")
+                                            .setStyle("DANGER")
+                                );
+                                //sends the message to the channel
+                                channel.send({ embeds: [confirmEmbed], components: [row] });
+
+
+
+
+
+                            } else {
+                                //SEND MESSAGES
+                                console.log("false");
+                            }
+
+
+
+
+
+
+                            let delay = 0;
+                            //Loops through all the pins to send
+                            //Works better than a 'forEach' loop in this case
+                            for (let i = 0; i < SendPins.length; i++) {
+
+                            }
+                        }
+                        /*
                         pins.forEach(pin => {
                             Tpins++;
                             let i = 0;
@@ -88,7 +160,7 @@ var methods = {
 
 
                     }
-
+                    */
 
 
 
