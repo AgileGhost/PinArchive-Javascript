@@ -225,7 +225,7 @@ client.on("channelPinsUpdate", async channel => {
     setTimeout(() => {
         console.log("Running....");
         PinArchive.execute(channel);
-    }, 5000);       //delay of 5 seconds to stop api lag and a double event
+    }, 1000);       //delay of 1 seconds to stop api lag and a double event
 });
 
 
