@@ -62,19 +62,29 @@ var methods = {
                                     .addComponents(
                                         //Button one, to confirm
                                         new MessageButton()
-                                            .setCustomId("Confirm")
+                                            .setCustomId("PinConfirm")
                                             .setLabel("Confirm")
                                             .setStyle("SUCCESS"),
                                         //Button two, to deny
                                         new MessageButton()
-                                            .setCustomId("Deny")
+                                            .setCustomId("PinDeny")
                                             .setLabel("Deny")
                                             .setStyle("DANGER")
                                 );
                                 //sends the message to the channel
-                                channel.send({ embeds: [confirmEmbed], components: [row] });
-
-
+                                let ConfirmMsg = await channel.send({ embeds: [confirmEmbed], components: [row] });
+                                //Creating an interaction listener waiting for an interaction, filters out others interactions and only waits for 15 seconds
+                                let CollectorFilter = i => i.customID === "PinConfirm" || i.customID === "PinDeny";
+                                const collector = channel.createMessageComponentCollector({ CollectorFilter, time: 15000 });
+                                //when the collector above finds an event
+                                collector.on("collect", async i => {
+                                    await ConfirmMsg.delete();
+                                    if (i.customId === "PinConfirm") {
+                                        console.log("Yeah send it");
+                                    } else {
+                                        console.log("Yeah deny it.");
+                                    }
+                                });
 
 
 
