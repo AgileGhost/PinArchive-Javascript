@@ -19,7 +19,6 @@ var methods = {
                 }
                 let pins;
                 let Tpins = 0;
-                let delay = 0;
                 if (chdata.pinArchive.enabled && Gdata.pinArchive.enabled) {
                     let SendPins = [];
                     pins = await channel.messages.fetchPinned();
@@ -81,7 +80,7 @@ var methods = {
                                 await ConfirmMsg.delete();
                                 if (i.customId === "PinConfirm") {
                                     console.log("Yeah send it");
-                                    archivePin(channel, SendPins, Gdata, delay);
+                                    archivePin(channel, SendPins, Gdata);
                                 }
                             });
 
@@ -90,7 +89,7 @@ var methods = {
                         } else {
                             //SEND MESSAGES
                             console.log("false");
-                            archivePin(channel, SendPins, Gdata, delay);
+                            archivePin(channel, SendPins, Gdata);
                         }
                     }
                 }
@@ -98,22 +97,5 @@ var methods = {
         });
     }
 }
-
-
-async function archivePin(channel, SendPins, Gdata, delay) {
-    //Loops through all the pins to send
-    //Works better than a 'forEach' loop in this case
-    for (let i = 0; i < SendPins.length; i++) {
-
-
-
-
-
-
-
-
-    }
-}
-
 
 module.exports = methods;

@@ -10,7 +10,6 @@ const GuildSchema = Schema({
         autoRemove: { type: Boolean, default: true },
         archiveAll: { type: Boolean, default: true }
     }
-
 });
 
 module.exports = model("GuildData", GuildSchema);
