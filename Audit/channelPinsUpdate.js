@@ -1,7 +1,7 @@
 const { Permissions, MessageEmbed, MessageButton, MessageActionRow } = require("discord.js");
 const ChannelData = require("../Models/ChannelData.js");
 const GuildData = require("../Models/GuildData.js");
-
+const archivePin = require("../Functions/archivePin.js");
 var methods = {
     name: "PinArchive",             //for when a command handler is added for the AUDIT stuff
     async execute(channel) {
@@ -80,7 +80,7 @@ var methods = {
                                 await ConfirmMsg.delete();
                                 if (i.customId === "PinConfirm") {
                                     console.log("Yeah send it");
-                                    archivePin(channel, SendPins, Gdata);
+                                    archivePin.execute(channel, SendPins, Gdata);
                                 }
                             });
 
@@ -89,7 +89,7 @@ var methods = {
                         } else {
                             //SEND MESSAGES
                             console.log("false");
-                            archivePin(channel, SendPins, Gdata);
+                            archivePin.execute(channel, SendPins, Gdata);
                         }
                     }
                 }

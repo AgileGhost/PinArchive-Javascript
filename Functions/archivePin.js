@@ -16,7 +16,7 @@ var methods = {
             //if there is an attachment in the message
             if (pin.attachments.size > 0) {
                 //loops through all the attachments
-                pin.attachments.array().forEach(attachment => {
+                pin.attachments.each(attachment => {
                     //checks if the channel is NSFW
                     if (channel.nsfw) {
                         pinEmbed.addField("This image was sent within a NSFW channel!", "Please click on the links above to see the original message");
@@ -29,12 +29,12 @@ var methods = {
                         if (channel.nsfw) {
                             pinEmbed.setDescription("|| " + pin.content + " ||");
                         } else {
-                            pinEmbed.setDescription(message.content);
+                            pinEmbed.setDescription(pin.content);
                         }
                     }
                     pinEmbed.addField("Original: ", "[Original](https://discord.com/channels/" + channel.guild.id + "/" + channel.id + "/" + pin.id + ")");
                     try {
-                        ArchiveChannel.send(pinEmbed);
+                        ArchiveChannel.send({ embeds: [pinEmbed] });
                     } catch (err) {
                         console.log(err);
                     }
@@ -47,7 +47,7 @@ var methods = {
                     pinEmbed.setDescription(pin.content);
                 }
                 try {
-                    ArchiveChannel.send(pinEmbed);
+                    ArchiveChannel.send({ embeds: [pinEmbed] });
                 } catch (err) {
                     console.log(err);
                 }
