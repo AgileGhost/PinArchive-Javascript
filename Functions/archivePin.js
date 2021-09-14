@@ -52,9 +52,6 @@ var methods = {
                     console.log(err);
                 }
             }
-
-
-
         }
     }
 }
