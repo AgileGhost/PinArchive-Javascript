@@ -8,7 +8,7 @@ const GuildSchema = Schema({
         enabled: { type: Boolean, default: true },
         channel: { type: String, required: true, default: "pin-archive" },
         autoRemove: { type: Boolean, default: true },
-        archiveAll: { type: Boolean, default: true }
+        archiveAll: { type: Boolean, default: false }
     }
 });
 

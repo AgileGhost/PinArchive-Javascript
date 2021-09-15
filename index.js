@@ -29,6 +29,7 @@ mongoose.connection.on("error", async (err) => {
 //Collections, Main Cache Data 
 client.InteractionCommands = new Collection();
 client.MessageCommands = new Collection();
+client.Audit = new Collection();
 
 //Grabs a folder and then grabs all the sub folders within that folder
 function GetDirectories(location) {
@@ -82,6 +83,28 @@ for (const file of MsgCmdFiles) {
         console.log("hmmm, there seems to be an error loading an message command!");
     }
     client.MessageCommands.set(command.name, command);
+}
+
+//reads the DIR of the audit folder(s) and grabs all the js files
+let AuditFiles = readdirSync("./Audit").filter(file => file.endsWith(".js"));
+for (const folder of GetDirectories("./Audit")) {
+    const auditFolderFiles = readdirSync("./Audit/" + folder).filter(file => file.endsWith(".js"));
+    for (const file of auditFolderFiles) {
+        AuditFiles.push([folder, file]);    
+    }
+}
+
+//loads the audit files
+for (const file of AuditFiles) {
+    let audit; 
+    if (Array.isArray(file)) {
+        audit = require("./Audit/" + file[0] + "/" + file[1]);
+        console.log("#Audit: " + file[1] + "has loaded, within " + file[0]);
+    } else {
+        audit = require("./Audit/" + file);
+        console.log("#Audit: " + file + " has been loaded");
+    }
+    client.Audit.set(audit.name, audit);
 }
 
 
@@ -207,7 +230,7 @@ client.on("messageCreate", async message => {
 
 
 //defining to the pinarchive code
-const PinArchive = require("./Audit/channelPinsUpdate.js");
+//const PinArchive = require("./Audit/channelPinsUpdate.js");
 client.on("channelPinsUpdate", async channel => {
     //If there is infomation missing due to missing the event, it will try to grab the infomation
     if (!channel.partial) {
@@ -224,12 +247,24 @@ client.on("channelPinsUpdate", async channel => {
     //The small delay fixes an issue were a quick event will run before its saved from the first one
     setTimeout(() => {
         console.log("Running....");
-        PinArchive.execute(channel);
+        //PinArchive.execute(channel);
+        client.Audit.find(aud => aud.name === "channelPinsUpdate").execute(channel);
     }, 1000);       //delay of 1 seconds to stop api lag and a double event
 });
 
 
+client.on("messageReactionAdd", async (reaction, user) => {
+    if (reaction.partial) {
+        try {
+            await reaction.fetch();
+        } catch (err) {
+            console.log(err);
+        }
+    }
 
+
+
+});
 
 
 

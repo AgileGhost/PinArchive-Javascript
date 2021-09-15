@@ -34,7 +34,11 @@ var methods = {
                     }
                     pinEmbed.addField("Original: ", "[Original](https://discord.com/channels/" + channel.guild.id + "/" + channel.id + "/" + pin.id + ")");
                     try {
-                        ArchiveChannel.send({ embeds: [pinEmbed] });
+                        setTimeout(() => {
+                            delay = delay + 3500;
+                            ArchiveChannel.send({ embeds: [pinEmbed] });
+                            console.log(delay);
+                        }, delay);
                     } catch (err) {
                         console.log(err);
                     }
@@ -47,7 +51,11 @@ var methods = {
                     pinEmbed.setDescription(pin.content);
                 }
                 try {
-                    ArchiveChannel.send({ embeds: [pinEmbed] });
+                    setTimeout(() => {
+                        delay = delay + 3500;
+                        ArchiveChannel.send({ embeds: [pinEmbed] });
+                        console.log(delay);
+                    }, delay);
                 } catch (err) {
                     console.log(err);
                 }

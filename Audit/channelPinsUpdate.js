@@ -3,7 +3,7 @@ const ChannelData = require("../Models/ChannelData.js");
 const GuildData = require("../Models/GuildData.js");
 const archivePin = require("../Functions/archivePin.js");
 var methods = {
-    name: "PinArchive",             //for when a command handler is added for the AUDIT stuff
+    name: "channelPinsUpdate",             //for when a command handler is added for the AUDIT stuff
     async execute(channel) {
         GuildData.findOne({ id: channel.guild.id }, async (err, Gdata) => {
             ChannelData.findOne({ id: channel.id }, async (err, chdata) => {
