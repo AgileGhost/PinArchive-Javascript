@@ -45,7 +45,7 @@ var methods = {
                             if (!guild.pinArchive.archiveAll) {
                                 //NOTE: last pin in SendPins will be the first (found) on the list
                                 SendPins = SendPins.last();
-                                console.log(SendPins);
+                                //console.log(SendPins);
                             }
                         }
                         //Checks if the channel is private, (both the channel itself and setting) if so will send a confirmation
@@ -79,16 +79,13 @@ var methods = {
                             collector.on("collect", async i => {
                                 await ConfirmMsg.delete();
                                 if (i.customId === "PinConfirm") {
-                                    console.log("Yeah send it");
+                                    //console.log("Yeah send it");
                                     archivePin.execute(channel, SendPins, Gdata);
                                 }
                             });
-
-
-
                         } else {
                             //SEND MESSAGES
-                            console.log("false");
+                            //console.log("false");
                             archivePin.execute(channel, SendPins, Gdata);
                         }
                     }

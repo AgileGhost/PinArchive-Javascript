@@ -125,7 +125,7 @@ client.on("ready", () => {
     client.guilds.cache.forEach(async guild => {
         await guild.commands.set(InterData).catch(err => {
             //ERROR HANDLER HERE
-            console.log(err);
+            return console.log("There was an error updating interaction commands for guild " + guild.id + " this may be due to insufficient perms!");
         });
         console.log(guild.id + " has been updated!!");
     });
@@ -261,9 +261,7 @@ client.on("messageReactionAdd", async (reaction, user) => {
             console.log(err);
         }
     }
-
-
-
+    client.Audit.find(cmd => aud.name === "messageReactionAdd").execute(reaction, user);
 });
 
 
