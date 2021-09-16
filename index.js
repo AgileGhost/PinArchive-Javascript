@@ -9,7 +9,7 @@ const GuildData = require("./Models/GuildData.js");
 
 
 //init the main client.
-const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES ] });
+const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS], partials: ["MESSAGE", "CHANNEL", "REACTION"] });
 
 //connecting to the mongoDB database
 mongoose.connect(MONGOOSE_LOGIN, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -233,7 +233,7 @@ client.on("messageCreate", async message => {
 //const PinArchive = require("./Audit/channelPinsUpdate.js");
 client.on("channelPinsUpdate", async channel => {
     //If there is infomation missing due to missing the event, it will try to grab the infomation
-    if (!channel.partial) {
+    if (channel.partial) {
         try {
             //grabs info
             await channel.fetch();
@@ -246,22 +246,25 @@ client.on("channelPinsUpdate", async channel => {
     //Sends the event to another place
     //The small delay fixes an issue were a quick event will run before its saved from the first one
     setTimeout(() => {
-        console.log("Running....");
-        //PinArchive.execute(channel);
+        //looks for the correct audit file and executes it.
         client.Audit.find(aud => aud.name === "channelPinsUpdate").execute(channel);
     }, 1000);       //delay of 1 seconds to stop api lag and a double event
 });
 
 
 client.on("messageReactionAdd", async (reaction, user) => {
+    //Checks if the event is a partial event and is missing data
     if (reaction.partial) {
         try {
             await reaction.fetch();
         } catch (err) {
-            console.log(err);
+            return console.log(err);
         }
     }
-    client.Audit.find(cmd => aud.name === "messageReactionAdd").execute(reaction, user);
+    //checks if the reaction is within a guild if not returns
+    if (!reaction.message.guildId) return;
+    //looks for audit then executes the file.
+    client.Audit.find(aud => aud.name === "messageReactionAdd").execute(reaction, user);
 });
 
 
