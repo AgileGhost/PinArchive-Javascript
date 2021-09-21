@@ -5,7 +5,7 @@ var methods = {
     name: "messageReactionAdd",             //for when a command handler is added for the AUDIT stuff
     async execute(reaction, user, client) {
         //Grabs the data on the guild
-        console.log("run");
+        //console.log("run");
         GuildData.findOne({ id: reaction.message.guildId }, async (err, Gdata) => {
             if (!Gdata) return;     //If there is no data it will return as the bot isn't set up correctly
             if (reaction.emoji.name === Gdata.pinArchive.reaction.emoji && Gdata.pinArchive.reaction.enabled) {
@@ -13,7 +13,7 @@ var methods = {
                     ChannelData.findOne({ id: reaction.message.channelId }, async (err, chdata) => {
                         //Loops through all the archived ids
                         let found = false;
-                        console.log("looking..");
+                        //console.log("looking..");
                         for (let i = 0; i < chdata.pinArchive.pinnedMessages.length; i++) {
                             //if the two ID's match
                             if (chdata.pinArchive.pinnedMessages[i] === reaction.message.id) {
@@ -31,8 +31,6 @@ var methods = {
                             });
                         }
                     });
-                } else {
-                    console.log("didn't find enough");
                 }
             }
         });
