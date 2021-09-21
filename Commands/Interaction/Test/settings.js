@@ -12,7 +12,7 @@ module.exports = {
             //Embed structure builder
             let SettingsEmbed = new MessageEmbed()
                 //Tells the user to go to the message based command to change
-                .setDescription("**Settings**\n\nTo change settings please use the message command `" + Gdata.prefix + "settings`\nNOTE: Only autoremove, `reactions`, `reactioncount` and `archiveall` can be changed!")
+                .setDescription("**Settings**\n\nTo change settings please use the message command `" + Gdata.prefix + "settings`\n**NOTE:** Only autoremove, `reactions`, `reactioncount` and `archiveall` can be changed!")
                 .addField("Prefix: ", `${Gdata.prefix}`, true)  //The prefix to execute a command
                 .addField("AutoRemove: ", `${Gdata.pinArchive.autoRemove}`, true) 
                 .addField("Reactions ", "Enabled: " + `${Gdata.pinArchive.reaction.enabled}`, true)
