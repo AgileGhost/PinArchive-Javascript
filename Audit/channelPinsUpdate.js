@@ -40,14 +40,21 @@ var methods = {
                     //updates the database with the new list
                     chdata.save().catch(err => console.log(err));
                     //Makes sure there is a pin to be sent.
-                    if (SendPins.length > 0) {
-                        if (SendPins > 1) {     //Checks if archive all is on, if so it will just ignore, if not will trim to the first found.
-                            if (!guild.pinArchive.archiveAll) {
-                                //NOTE: last pin in SendPins will be the first (found) on the list
-                                SendPins = SendPins.last();
-                                //console.log(SendPins);
-                            }
+                    if (Tpins > 49 && Gdata.pinArchive.autoRemove) {
+                        try {
+                            pins.last().unpin();
+                        } catch (err) {
+                            console.log(err);
                         }
+                    }
+                    //console.log("road");
+                    //console.log(SendPins.length);
+                    if (SendPins.length > 0) {
+                        //console.log("here");
+                        if (Gdata.pinArchive.archiveAll === false) {
+                            SendPins = [SendPins.pop()];
+                        }
+                        //console.log(SendPins);
                         //Checks if the channel is private, (both the channel itself and setting) if so will send a confirmation
                         if (chdata.pinArchive.private || !channel.permissionsFor(channel.guild.roles.everyone).has(Permissions.FLAGS.VIEW_CHANNEL)) {
                             //the creation of an embed.

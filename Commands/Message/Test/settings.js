@@ -1,9 +1,9 @@
 const GuildData = require("../../../Models/GuildData");
-
+const { Permissions } = require("discord.js");
 module.exports = {
     name: "settings",
     description: "Change settings for the bot, to view current settings use the interaction",
-    userPermissions: [],
+    userPermissions: [Permissions.FLAGS.MANAGE_GUILD],
     botPermissions: [],
     async execute(message, args) {
         //below makes sure there is actual arguments to work with
