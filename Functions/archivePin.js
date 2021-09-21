@@ -34,27 +34,34 @@ var methods = {
                     }
                     pinEmbed.addField("Original: ", "[Original](https://discord.com/channels/" + channel.guild.id + "/" + channel.id + "/" + pin.id + ")");
                     try {
+                        //tries to delay the messages sent when there is a large bulk of message to reduce api abuse
                         setTimeout(() => {
                             delay = delay + 3500;
+                            //sends the data to the channel
                             ArchiveChannel.send({ embeds: [pinEmbed] });
-                            console.log(delay);
+                            //console.log(delay);
                         }, delay);
                     } catch (err) {
                         console.log(err);
                     }
                 });
             } else {
+               //If only one/no attachment in the message
                 pinEmbed.addField("Link: ", "[Original](https://discord.com/channels/" + channel.guild.id + "/" + channel.id + "/" + pin.id + ")");
-                if (channel.nsfw) {
+                if (channel.nsfw) { //checks if NSFW channel
+                    //if NSFW hides the message behind a spoiler (needs a check on the messsage so it doesn't break any spoilers before)
                     pinEmbed.addField("Send within a NSFW channel", "|| " + pin.content + " ||");
                 } else {
+                    //if not NSFW just adds it like normal
                     pinEmbed.setDescription(pin.content);
                 }
                 try {
+                    //tries to delay the messages sent when there is a large bulk of message to reduce api abuse
                     setTimeout(() => {
                         delay = delay + 3500;
+                        //sends the data to the channel
                         ArchiveChannel.send({ embeds: [pinEmbed] });
-                        console.log(delay);
+                        //console.log(delay);
                     }, delay);
                 } catch (err) {
                     console.log(err);

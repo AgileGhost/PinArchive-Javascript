@@ -126,7 +126,7 @@ client.on("ready", () => {
     client.guilds.cache.forEach(async guild => {
         await guild.commands.set(InterData).catch(err => {
             //ERROR HANDLER HERE
-            return console.log("There was an error updating interaction commands for guild " + guild.id + " this may be due to insufficient perms!");
+            return console.log(err);//console.log("There was an error updating interaction commands for guild " + guild.id + " this may be due to insufficient perms!");
         });
         console.log(guild.id + " has been updated!!");
     });
@@ -135,7 +135,7 @@ client.on("ready", () => {
 
 //INTERACTION CREATED.          When an interaction is sent to the bot.
 client.on("interactionCreate", interaction => {
-    //console.log(interaction);               //gives raw data of the interaction. Recommended to be commented out
+    console.log(interaction);               //gives raw data of the interaction. Recommended to be commented out
     if (!interaction.isCommand()) return;           //if the interaction isn't a command
     //finds a match out of the commands
     client.InteractionCommands.forEach(cmd => {
