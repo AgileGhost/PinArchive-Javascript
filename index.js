@@ -264,7 +264,7 @@ client.on("messageReactionAdd", async (reaction, user) => {
     //checks if the reaction is within a guild if not returns
     if (!reaction.message.guildId) return;
     //looks for audit then executes the file.
-    client.Audit.find(aud => aud.name === "messageReactionAdd").execute(reaction, user);
+    client.Audit.find(aud => aud.name === "messageReactionAdd").execute(reaction, user, client);
 });
 
 
