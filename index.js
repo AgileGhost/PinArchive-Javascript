@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 
 //calling in database models
 const GuildData = require("./Models/GuildData.js");
+const ChannelData = require("./Models/ChannelData");
 
 
 //init the main client.
@@ -224,6 +225,26 @@ client.on("messageCreate", async message => {
                     }
                 }
             }
+        }
+    });
+    //Below isn't the best way of doing this, although it fixes a bug in return of some resource usage it doesn't remove old/deleted channels, taking up storage over time. 
+    //It would be best to keep track of channels through events and to make sure it checks all channels on boot up and joining for the first time
+    message.guild.channels.cache.forEach(channel => {
+        //checks if the channels can have messages sent within them
+        if (channel.type !== "GUILD_VOICE" || channel.type !== "GUILD_Store") {
+            //checks the exisitance of an entry into the database for all the channels
+            ChannelData.findOne({ id: channel.id }, (err, chdata) => {
+                //creation of the new data structure
+                if (!chdata) {  //checks if there is already an entry and skips it
+                    const NewChannelData = new ChannelData({
+                        id: channel.id,
+                        creationDate: Date.now(),
+                        guildID: message.guild.id
+                    });
+                    //saves the data
+                    return NewChannelData.save().catch(err => console.log(err));
+                }
+            });
         }
     });
 });

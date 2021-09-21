@@ -1,4 +1,3 @@
-const { Permissions, MessageEmbed, MessageButton, MessageActionRow } = require("discord.js");
 const ChannelData = require("../Models/ChannelData.js");
 const GuildData = require("../Models/GuildData.js");
 const archivePin = require("../Functions/archivePin.js");
@@ -23,15 +22,12 @@ var methods = {
                             }
                         }
                         if (!found) {
-                            //Sends to archive
-                            console.log("sending...");
-                            //let msg = await client.channels.cache.get(reaction.message.channelId).messages.fetch(reaction.message.id);
-                            let SendPins = [msg];
-                            GuildData.findOne({}, () => {
+                            let SendPins = [reaction.message];
+                            //Grabs the guild data
+                            GuildData.findOne({ id: reaction.message.guild.id }, (err, Gdata) => {
+                                //console.log("Sending it over...");
+                                //sends the data over to be archived
                                 archivePin.execute(reaction.message.channel, SendPins, Gdata);
-
-
-
                             });
                         }
                     });
