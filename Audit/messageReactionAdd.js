@@ -9,7 +9,7 @@ var methods = {
         GuildData.findOne({ id: reaction.message.guildId }, async (err, Gdata) => {
             if (!Gdata) return;     //If there is no data it will return as the bot isn't set up correctly
             if (reaction.emoji.name === Gdata.pinArchive.reaction.emoji && Gdata.pinArchive.reaction.enabled) {
-                if (reaction.count > Gdata.pinArchive.reaction.count) {
+                if (reaction.count = Gdata.pinArchive.reaction.count) {
                     ChannelData.findOne({ id: reaction.message.channelId }, async (err, chdata) => {
                         //Loops through all the archived ids
                         let found = false;
